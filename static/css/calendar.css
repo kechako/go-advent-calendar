@@ -1,0 +1,21 @@
+table.calendar {
+  border-collapse: collapse;
+  border: 1px solid gray
+}
+
+table.calendar th, table.calendar td {
+  padding: 0.5em;
+  width: 10em;
+  border: 1px solid gray
+}
+
+table.calendar td {
+  height: 4em;
+  vertical-align: top
+}
+
+body {
+  margin: 0;
+  padding: 1em;
+  width: 100%
+}

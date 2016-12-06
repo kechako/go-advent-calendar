@@ -9,6 +9,9 @@ skip_files:
 - router/
 
 handlers:
+- url: /css
+  static_dir: static/css
+
 - url: /.*
   script: _go_app
 
@@ -16,3 +19,4 @@ env_variables:
   CALENDAR_NAME: Advent Calendar
   CALENDAR_YEAR_MIN: 2014
   CALENDAR_YEAR_MAX: 2099
+  CALENDAR_LOCATION: Asia/Tokyo

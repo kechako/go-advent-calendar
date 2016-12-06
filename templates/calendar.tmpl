@@ -2,10 +2,39 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <link href="/css/calendar.css" rel="stylesheet" />
     <title>{{.Name}} {{.Year}}</title>
   </head>
   <body>
     <h1>{{.Name}} {{.Year}}</h1>
+    <article>
+      <table class="calendar">
+        <thead>
+          <th>Sun</th>
+          <th>Mon</th>
+          <th>Tue</th>
+          <th>Wed</th>
+          <th>Thu</th>
+          <th>Fri</th>
+          <th>Sat</th>
+        </thead>
+        <tbody>
+          {{range .Weeks}}
+            <tr>
+              {{range .Days}}
+                <td>
+                  {{if gt .Day 0 -}}
+                    {{.Day}}
+                  {{- else -}}
+                    &nbsp;
+                  {{- end}}
+                </td>
+              {{end}}
+            </tr>
+          {{end}}
+        </tbody>
+      </table>
+    </article>
   </body>
 </html>
 
