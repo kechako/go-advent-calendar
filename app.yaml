@@ -1,0 +1,18 @@
+application: go-advent-calendar
+version: 1
+runtime: go
+api_version: go1
+
+skip_files:
+- calendar/
+- config/
+- router/
+
+handlers:
+- url: /.*
+  script: _go_app
+
+env_variables:
+  CALENDAR_NAME: Advent Calendar
+  CALENDAR_YEAR_MIN: 2014
+  CALENDAR_YEAR_MAX: 2099
