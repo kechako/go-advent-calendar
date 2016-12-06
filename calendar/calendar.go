@@ -8,6 +8,8 @@ import (
 
 	"github.com/kechako/go-advent-calendar/config"
 	"github.com/kechako/go-advent-calendar/router"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 )
 
 // テンプレート
@@ -25,6 +27,9 @@ func init() {
 
 // カレンダーを表示するハンドラー
 func calendarHandler(w http.ResponseWriter, r *http.Request) {
+	// App Engine のコンテキスト取得
+	ctx := appengine.NewContext(r)
+
 	conf := config.GetConfig()
 
 	year, err := router.GetYear(r, "year")
@@ -41,6 +46,7 @@ func calendarHandler(w http.ResponseWriter, r *http.Request) {
 		Year: year,
 	})
 	if err != nil {
+		log.Errorf(ctx, "Template error: %s", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
