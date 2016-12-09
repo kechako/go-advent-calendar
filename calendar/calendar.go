@@ -2,7 +2,6 @@ package calendar
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 	"io"
 	"net/http"
@@ -53,8 +52,7 @@ func calendarHandler(w http.ResponseWriter, r *http.Request) {
 		year, err = strconv.Atoi(yearStr)
 		if err != nil || year < yearMin || year > yearMax {
 			// 見つからない
-			w.WriteHeader(404)
-			fmt.Fprintln(w, "Not Found")
+			http.NotFound(w, r)
 			return
 		}
 	}
@@ -66,7 +64,7 @@ func calendarHandler(w http.ResponseWriter, r *http.Request) {
 		Year: year,
 	})
 	if err != nil {
-		w.WriteHeader(500)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	// バッファからレスポンスにコピー
