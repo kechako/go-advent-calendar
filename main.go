@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 // 許容する年の範囲
@@ -23,10 +26,14 @@ type calendarData struct {
 
 // カレンダーを表示するハンドラー
 func calenerHundler(w http.ResponseWriter, r *http.Request) {
+	var err error
+
 	now := time.Now()
 	var year int
 
-	if r.URL.Path == "/" {
+	vars := mux.Vars(r)
+	yearStr := vars["year"]
+	if yearStr == "" {
 		if now.Month() >= 11 {
 			// 11月以降は今年
 			year = now.Year()
@@ -36,7 +43,7 @@ func calenerHundler(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		// URL から年を取得
-		_, err := fmt.Sscanf(r.URL.Path, "/%d", &year)
+		year, err = strconv.Atoi(yearStr)
 		if err != nil || year < yearMin || year > yearMax {
 			// 見つからない
 			w.WriteHeader(404)
@@ -44,7 +51,7 @@ func calenerHundler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	err := calendarTmpl.Execute(w, &calendarData{
+	err = calendarTmpl.Execute(w, &calendarData{
 		Year: year,
 	})
 	if err != nil {
@@ -53,7 +60,8 @@ func calenerHundler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", calenerHundler)
+	r := mux.NewRouter()
+	r.HandleFunc("/{year:\\d*}", calenerHundler).Methods("GET")
 
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", r)
 }
