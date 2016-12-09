@@ -31,7 +31,7 @@ func GetYear(r *http.Request, name string) (int, error) {
 	vars := mux.Vars(r)
 	yearStr := vars[name]
 	if yearStr == "" {
-		now := time.Now()
+		now := time.Now().In(conf.Location)
 
 		if now.Month() >= 11 {
 			// 11月以降は今年
