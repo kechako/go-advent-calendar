@@ -1,8 +1,10 @@
 package calendar
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -56,10 +58,17 @@ func calendarHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	err = calendarTmpl.Execute(w, &calendarData{
+
+	// 直接レスポンスに書き込むとエラー時にステータスを変更できないので
+	// バッファーに書き込む
+	buff := new(bytes.Buffer)
+	err = calendarTmpl.Execute(buff, &calendarData{
 		Year: year,
 	})
 	if err != nil {
 		w.WriteHeader(500)
+		return
 	}
+	// バッファからレスポンスにコピー
+	io.Copy(w, buff)
 }
