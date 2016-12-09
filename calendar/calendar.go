@@ -9,13 +9,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/kechako/go-advent-calendar/config"
 	"github.com/kechako/go-advent-calendar/router"
-)
-
-// 許容する年の範囲
-const (
-	yearMin = 2014
-	yearMax = 2099
 )
 
 // テンプレート
@@ -23,6 +18,7 @@ var calendarTmpl = template.Must(template.ParseFiles("templates/calendar.tmpl"))
 
 // カレンダーに表示するデータを格納する構造体
 type calendarData struct {
+	Name string
 	Year int
 }
 
@@ -34,6 +30,7 @@ func init() {
 func calendarHandler(w http.ResponseWriter, r *http.Request) {
 	var err error
 
+	conf := config.GetConfig()
 	now := time.Now()
 	var year int
 
@@ -50,7 +47,7 @@ func calendarHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// URL から年を取得
 		year, err = strconv.Atoi(yearStr)
-		if err != nil || year < yearMin || year > yearMax {
+		if err != nil || year < conf.CalendarYearMin || year > conf.CalendarYearMax {
 			// 見つからない
 			http.NotFound(w, r)
 			return
@@ -61,6 +58,7 @@ func calendarHandler(w http.ResponseWriter, r *http.Request) {
 	// バッファーに書き込む
 	buff := new(bytes.Buffer)
 	err = calendarTmpl.Execute(buff, &calendarData{
+		Name: conf.CalendarName,
 		Year: year,
 	})
 	if err != nil {
