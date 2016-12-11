@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link href="/css/calendar.css" rel="stylesheet" />
+    <title>Day {{.Day}} - {{.Name}} {{.Year}}</title>
+  </head>
+  <body>
+    <h1>Day {{.Day}} - {{.Name}} {{.Year}}</h1>
+    <article>
+      <form action="/{{.Year}}/entries/{{.Day}}" method="POST">
+        <ul>
+          <li><label for="title">Title</label><input id="title" name="title" type="text" value="{{.Entry.Title}}" /></li>
+          <li><label for="url">Url</label><input id="url" name="url" type="text" value="{{.Entry.Url}}" /></li>
+          <li><label for="author">Author</label><input id="author" name="author" type="text" value="{{.Entry.Author}}" /></li>
+          <li><label for="section">Section</label><input id="section" name="section" type="text" value="{{.Entry.Section}}" /></li>
+          <li><input type="Submit" value="Save" /></li>
+        </ul>
+      </form>
+    </article>
+  </body>
+</html>
+
