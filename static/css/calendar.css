@@ -1,11 +1,25 @@
+body {
+  margin: 0;
+  padding: 0 1em;
+}
+
+h1 {
+  margin: 0;
+}
+
+article {
+  margin: 1em 0;
+}
+
 table.calendar {
   border-collapse: collapse;
-  border: 1px solid gray
+  border: 1px solid gray;
+  table-layout: fixed;
+  width: 100%;
 }
 
 table.calendar th, table.calendar td {
   padding: 0.5em;
-  width: 10em;
   border: 1px solid gray
 }
 
@@ -32,10 +46,4 @@ form ul li label {
 
 form ul li input[type="text"] {
   width: 20em;
-}
-
-body {
-  margin: 0;
-  padding: 1em;
-  width: 100%
 }

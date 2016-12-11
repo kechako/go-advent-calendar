@@ -23,30 +23,27 @@
             <tr>
               {{range .Days}}
                 <td>
-                  {{if gt .Day 0 -}}
-                    {{- if .Entry -}}
-                      <p><a href="/{{$.Year}}/entries/{{.Day}}">{{.Day}}</a>
-                      {{- if and .Entry.Title .Entry.Url -}}
-                        {{- if .Date.Before $.Now -}}
-                          <a href="{{.Entry.Url}}">{{.Entry.Title}}</a>
-                        {{- else -}}
-                          {{.Entry.Title}}
-                        {{- end -}}
-                      {{- end -}}
-                      </p>
-                      {{- if .Entry.Author -}}
-                        <p>{{.Entry.Author -}}
-                        {{- if .Entry.Section -}}
-                          ({{.Entry.Section}})
-                        {{- end -}}
-                        </p>
-                      {{- end -}}
+                {{- if and (ge .Day 1) (le .Day 25) -}}
+                  {{- if .Entry }}
+                  <p>
+                    <a href="/{{$.Year}}/entries/{{.Day}}">{{.Day}}</a>
+                    {{- if and .Entry.Title .Entry.Url (.Date.Before $.Now) }}
+                    <a href="{{.Entry.Url}}">{{.Entry.Title}}</a>
                     {{- else }}
-                      <p>{{.Day}} <a href="/{{$.Year}}/entries/{{.Day}}">New Entry</a></p>
-                    {{- end }}
-                  {{- else -}}
-                    &nbsp;
-                  {{- end}}
+                      {{.Entry.Title}}
+                    {{ end }}
+                  </p>
+                  {{ if .Entry.Author -}}
+                  <p>{{.Entry.Author }}{{ if .Entry.Section }} ({{.Entry.Section}}){{ end }}</p>
+                  {{- end }}
+                  {{- else }}
+                  <p>{{.Day}} <a href="/{{$.Year}}/entries/{{.Day}}">New Entry</a></p>
+                  {{- end }}
+                {{ else if gt .Day 25 }}
+                  <p>{{.Day}}</p>
+                {{ else -}}
+                  <p/>
+                {{- end -}}
                 </td>
               {{end}}
             </tr>
