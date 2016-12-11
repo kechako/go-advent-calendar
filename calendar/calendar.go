@@ -87,7 +87,7 @@ func calendarHandler(w http.ResponseWriter, r *http.Request) {
 func makeWeeks(year int, entries []*store.Entry, loc *time.Location) []*calendarWeek {
 	entMap := makeEntryMap(entries)
 
-	weeks := make([]*calendarWeek, 0, 5)
+	weeks := make([]*calendarWeek, 0, 6)
 	t := time.Date(year, 12, 1, 0, 0, 0, 0, loc)
 	for wi := 0; ; wi++ {
 		week := &calendarWeek{
@@ -98,17 +98,18 @@ func makeWeeks(year int, entries []*store.Entry, loc *time.Location) []*calendar
 			day := &calendarDay{}
 			week.Days = append(week.Days, day)
 
-			if t.Weekday() == time.Weekday(di) {
+			if t.Month() == 12 && t.Weekday() == time.Weekday(di) {
 				day.Day = t.Day()
 				day.Entry = entMap[day.Day]
 				day.Date = t
 				t = t.AddDate(0, 0, 1)
-				if t.Month() != 12 {
-					return weeks
-				}
 			}
 		}
+		if t.Month() != 12 {
+			break
+		}
 	}
+	return weeks
 }
 
 // エントリーの日付をキーとするマップを作成します。
