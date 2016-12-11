@@ -10,8 +10,13 @@ table.calendar th, table.calendar td {
 }
 
 table.calendar td {
-  height: 4em;
+  padding: 0.5em;
+  height: 6em;
   vertical-align: top
+}
+
+table.calendar td p {
+  margin: 0;
 }
 
 form ul {

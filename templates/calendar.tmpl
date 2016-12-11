@@ -24,7 +24,26 @@
               {{range .Days}}
                 <td>
                   {{if gt .Day 0 -}}
-                    {{.Day}}
+                    {{- if .Entry -}}
+                      <p><a href="/{{$.Year}}/entries/{{.Day}}">{{.Day}}</a>
+                      {{- if and .Entry.Title .Entry.Url -}}
+                        {{- if .Date.Before $.Now -}}
+                          <a href="{{.Entry.Url}}">{{.Entry.Title}}</a>
+                        {{- else -}}
+                          {{.Entry.Title}}
+                        {{- end -}}
+                      {{- end -}}
+                      </p>
+                      {{- if .Entry.Author -}}
+                        <p>{{.Entry.Author -}}
+                        {{- if .Entry.Section -}}
+                          ({{.Entry.Section}})
+                        {{- end -}}
+                        </p>
+                      {{- end -}}
+                    {{- else }}
+                      <p>{{.Day}} <a href="/{{$.Year}}/entries/{{.Day}}">New Entry</a></p>
+                    {{- end }}
                   {{- else -}}
                     &nbsp;
                   {{- end}}
