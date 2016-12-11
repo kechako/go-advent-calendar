@@ -16,6 +16,8 @@ var Router = mux.NewRouter()
 var (
 	// URL から年が見つからないエラー。
 	ErrYearNotFound = errors.New("Year not found.")
+	// URL から日が見つからないエラー。
+	ErrDayNotFound = errors.New("Day not found.")
 )
 
 func init() {
@@ -56,4 +58,28 @@ func GetYear(r *http.Request, name string) (int, error) {
 	}
 
 	return year, nil
+}
+
+// リクエストのパスで指定された日を取得します。
+// name はパスパターンで指定したパラメーター名です。
+func GetDay(r *http.Request, name string) (int, error) {
+	vars := mux.Vars(r)
+	dayStr := vars[name]
+	if dayStr == "" {
+		return 0, ErrDayNotFound
+	}
+
+	// URL から日を取得
+	day, err := strconv.Atoi(dayStr)
+	if err != nil {
+		// 見つからない
+		return 0, ErrDayNotFound
+	}
+
+	if day < 1 || day > 25 {
+		// 範囲外
+		return 0, ErrDayNotFound
+	}
+
+	return day, nil
 }
