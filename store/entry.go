@@ -1,6 +1,10 @@
 package store
 
-import "google.golang.org/appengine/datastore"
+import (
+	"time"
+
+	"google.golang.org/appengine/datastore"
+)
 
 const (
 	KindCalendar = "Calendar"
@@ -9,12 +13,14 @@ const (
 
 // カレンダーのエントリー情報を格納する構造体。
 type Entry struct {
-	Year    int `datastore:"-"`
-	Day     int `datastore:"-"`
-	Title   string
-	Url     string
-	Author  string
-	Section string
+	Year      int `datastore:"-"`
+	Day       int `datastore:"-"`
+	Title     string
+	Url       string
+	Author    string
+	Section   string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 // カレンダー Kind のキーを生成します。
@@ -69,6 +75,12 @@ func (s *Store) GetEntries(year int) ([]*Entry, error) {
 
 // エントリーを登録します。
 func (s *Store) PutEntry(entry *Entry) error {
+	now := time.Now()
+	if entry.CreatedAt.IsZero() {
+		entry.CreatedAt = now
+	}
+	entry.UpdatedAt = now
+
 	entKey := s.entryKey(entry.Year, entry.Day)
 
 	_, err := datastore.Put(s.ctx, entKey, entry)
