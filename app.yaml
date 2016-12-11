@@ -7,6 +7,7 @@ skip_files:
 - calendar/
 - config/
 - router/
+- store/
 
 handlers:
 - url: /css
