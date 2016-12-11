@@ -2,6 +2,7 @@ package router
 
 import (
 	"errors"
+	"net"
 	"net/http"
 	"strconv"
 	"time"
@@ -20,8 +21,40 @@ var (
 	ErrDayNotFound = errors.New("Day not found.")
 )
 
+// IP フィルタリングを行うハンドラーを返します。
+func ipFilterHandler(next http.Handler) http.Handler {
+	ipList := config.GetConfig().IPWhiteList
+
+	if len(ipList) == 0 {
+		// 設定なし
+		return next
+	}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := next.ServeHTTP
+
+		host, _, err := net.SplitHostPort(r.RemoteAddr)
+		if err != nil {
+			host = r.RemoteAddr
+		}
+
+		found := false
+		for _, ip := range ipList {
+			if host == ip {
+				found = true
+				break
+			}
+		}
+		if !found {
+			handler = http.NotFound
+		}
+
+		handler(w, r)
+	})
+}
+
 func init() {
-	http.Handle("/", Router)
+	http.Handle("/", ipFilterHandler(Router))
 }
 
 // リクエストのパスで指定された年を取得します。

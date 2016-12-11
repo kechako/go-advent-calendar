@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -12,6 +13,7 @@ type Config struct {
 	CalendarYearMin int
 	CalendarYearMax int
 	Location        *time.Location
+	IPWhiteList     []string
 }
 
 var config *Config
@@ -22,6 +24,7 @@ func init() {
 		CalendarYearMin: atoi(os.Getenv("CALENDAR_YEAR_MIN"), 2014),
 		CalendarYearMax: atoi(os.Getenv("CALENDAR_YEAR_MAX"), 2099),
 		Location:        getLocation(),
+		IPWhiteList:     strings.Fields(os.Getenv("IP_WHITE_LIST")),
 	}
 }
 
