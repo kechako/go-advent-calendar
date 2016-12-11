@@ -13,14 +13,14 @@ const (
 
 // カレンダーのエントリー情報を格納する構造体。
 type Entry struct {
-	Year      int `datastore:"-"`
-	Day       int `datastore:"-"`
-	Title     string
-	Url       string
-	Author    string
-	Section   string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Year      int       `datastore:"-" json:"year"`
+	Day       int       `datastore:"-" json:"day"`
+	Title     string    `json:"title"`
+	Url       string    `json:"url"`
+	Author    string    `json:"author"`
+	Section   string    `json:"section"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // カレンダー Kind のキーを生成します。
