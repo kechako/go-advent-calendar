@@ -38,7 +38,11 @@ type calendarData struct {
 }
 
 func init() {
-	router.Router.HandleFunc("/{year:\\d*}", calendarHandler).Methods("GET")
+	http.Handle("/",
+		router.IPFilterHandler(
+			router.MethodsHandler(map[string]http.Handler{
+				"GET": http.HandlerFunc(calendarHandler),
+			})))
 }
 
 // カレンダーを表示するハンドラー
@@ -48,8 +52,14 @@ func calendarHandler(w http.ResponseWriter, r *http.Request) {
 
 	conf := config.GetConfig()
 
-	year, err := router.GetYear(r, "year")
+	params, err := router.GetPathParams(r, ":year")
 	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	year, ok := router.GetYear(params["year"])
+	if !ok {
 		http.NotFound(w, r)
 		return
 	}

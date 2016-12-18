@@ -25,7 +25,12 @@ type entryData struct {
 }
 
 func init() {
-	router.Router.HandleFunc("/{year:\\d*}/entries/{day:\\d*}", entryHandler).Methods("GET")
+	http.Handle("/entries/",
+		router.IPFilterHandler(
+			router.MethodsHandler(map[string]http.Handler{
+				"GET":  http.HandlerFunc(entryHandler),
+				"POST": http.HandlerFunc(entryPostHandler),
+			})))
 }
 
 // エントリーを表示するハンドラー
@@ -35,13 +40,20 @@ func entryHandler(w http.ResponseWriter, r *http.Request) {
 
 	conf := config.GetConfig()
 
-	year, err := router.GetYear(r, "year")
+	params, err := router.GetPathParams(r, "entries", ":year", ":day")
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
-	day, err := router.GetDay(r, "day")
-	if err != nil {
+
+	year, ok := router.GetYear(params["year"])
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	day, ok := router.GetDay(params["day"])
+	if !ok {
 		http.NotFound(w, r)
 		return
 	}

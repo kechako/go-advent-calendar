@@ -10,22 +10,25 @@ import (
 	"google.golang.org/appengine/log"
 )
 
-func init() {
-	router.Router.HandleFunc("/{year:\\d*}/entries/{day:\\d*}", entryPostHandler).Methods("POST")
-}
-
 // エントリーを登録するハンドラー
 func entryPostHandler(w http.ResponseWriter, r *http.Request) {
 	// App Engine のコンテキスト取得
 	ctx := appengine.NewContext(r)
 
-	year, err := router.GetYear(r, "year")
+	params, err := router.GetPathParams(r, "entries", ":year", ":day")
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
-	day, err := router.GetDay(r, "day")
-	if err != nil {
+
+	year, ok := router.GetYear(params["year"])
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	day, ok := router.GetDay(params["day"])
+	if !ok {
 		http.NotFound(w, r)
 		return
 	}

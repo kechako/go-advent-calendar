@@ -13,8 +13,12 @@ import (
 )
 
 func init() {
-	router.Router.HandleFunc("/api/{year:\\d*}/entries", entriesAPIHandler).Methods("GET")
-	router.Router.HandleFunc("/api/{year:\\d*}/entries", postEntriesAPIHandler).Methods("POST")
+	http.Handle("/api/entries/",
+		router.IPFilterHandler(
+			router.MethodsHandler(map[string]http.Handler{
+				"GET":  http.HandlerFunc(entriesAPIHandler),
+				"POST": http.HandlerFunc(postEntriesAPIHandler),
+			})))
 }
 
 // エントリーを JSON で返すAPIハンドラー
@@ -22,8 +26,14 @@ func entriesAPIHandler(w http.ResponseWriter, r *http.Request) {
 	// App Engine のコンテキスト取得
 	ctx := appengine.NewContext(r)
 
-	year, err := router.GetYear(r, "year")
+	params, err := router.GetPathParams(r, "api", "entries", ":year")
 	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	year, ok := router.GetYear(params["year"])
+	if !ok {
 		http.NotFound(w, r)
 		return
 	}
@@ -54,8 +64,14 @@ func postEntriesAPIHandler(w http.ResponseWriter, r *http.Request) {
 	// App Engine のコンテキスト取得
 	ctx := appengine.NewContext(r)
 
-	year, err := router.GetYear(r, "year")
+	params, err := router.GetPathParams(r, "api", "entries", ":year")
 	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	year, ok := router.GetYear(params["year"])
+	if !ok {
 		http.NotFound(w, r)
 		return
 	}

@@ -8,7 +8,7 @@
   <body>
     <h1>Day {{.Day}} - {{.Name}} {{.Year}}</h1>
     <article>
-      <form action="/{{.Year}}/entries/{{.Day}}" method="POST">
+      <form action="/entries/{{.Year}}/{{.Day}}" method="POST">
         <ul>
           <li><label for="title">Title</label><input id="title" name="title" type="text" value="{{.Entry.Title}}" /></li>
           <li><label for="url">Url</label><input id="url" name="url" type="text" value="{{.Entry.Url}}" /></li>
