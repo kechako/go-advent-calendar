@@ -1,6 +1,8 @@
 package store
 
-import "golang.org/x/net/context"
+import (
+	"context"
+)
 
 // データストアにアクセスするための情報を格納する構造体。
 type Store struct {
