@@ -24,8 +24,7 @@ func (h *Handler) entriesAPIHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s := store.NewStore(ctx)
-	entries, err := s.GetEntries(year)
+	entries, err := h.store.GetEntries(ctx, year)
 	if err != nil {
 		log.Errorf(ctx, "Get entries error : %s", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -76,11 +75,10 @@ func (h *Handler) postEntriesAPIHandler(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	s := store.NewStore(ctx)
 	for _, e := range entries {
 		e.Year = year
 
-		err = s.PutEntry(e)
+		err = h.store.PutEntry(ctx, e)
 		if err != nil {
 			log.Errorf(ctx, "Put entry error : %s", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)

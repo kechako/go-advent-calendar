@@ -1,9 +1,10 @@
 package store
 
 import (
+	"context"
 	"time"
 
-	"google.golang.org/appengine/datastore"
+	"cloud.google.com/go/datastore"
 )
 
 const (
@@ -25,22 +26,22 @@ type Entry struct {
 
 // カレンダー Kind のキーを生成します。
 func (s *Store) calendarKey(year int) *datastore.Key {
-	return datastore.NewKey(s.ctx, KindCalendar, "", int64(year), nil)
+	return datastore.IDKey(KindCalendar, int64(year), nil)
 }
 
 // エントリー Kind のキーを生成します。
 func (s *Store) entryKey(year, day int) *datastore.Key {
 	calKey := s.calendarKey(year)
-	return datastore.NewKey(s.ctx, KindEntry, "", int64(day), calKey)
+	return datastore.IDKey(KindEntry, int64(day), calKey)
 }
 
 // エントリーを取得します。
 // エントリーが見つからない場合は nil を返します。
-func (s *Store) GetEntry(year, day int) (*Entry, error) {
+func (s *Store) GetEntry(ctx context.Context, year, day int) (*Entry, error) {
 	entKey := s.entryKey(year, day)
 
 	entry := new(Entry)
-	err := datastore.Get(s.ctx, entKey, entry)
+	err := s.client.Get(ctx, entKey, entry)
 	if err == datastore.ErrNoSuchEntity {
 		// データなし
 		return nil, nil
@@ -55,26 +56,26 @@ func (s *Store) GetEntry(year, day int) (*Entry, error) {
 }
 
 // year で指定した年のエントリーを取得します。
-func (s *Store) GetEntries(year int) ([]*Entry, error) {
+func (s *Store) GetEntries(ctx context.Context, year int) ([]*Entry, error) {
 	calKey := s.calendarKey(year)
 
 	entries := make([]*Entry, 0, 25)
 	query := datastore.NewQuery(KindEntry).Ancestor(calKey)
-	keys, err := query.GetAll(s.ctx, &entries)
+	keys, err := s.client.GetAll(ctx, query, &entries)
 	if err != nil {
 		return nil, err
 	}
 
 	for i, key := range keys {
 		entries[i].Year = year
-		entries[i].Day = int(key.IntID())
+		entries[i].Day = int(key.ID)
 	}
 
 	return entries, nil
 }
 
 // エントリーを登録します。
-func (s *Store) PutEntry(entry *Entry) error {
+func (s *Store) PutEntry(ctx context.Context, entry *Entry) error {
 	now := time.Now()
 	if entry.CreatedAt.IsZero() {
 		entry.CreatedAt = now
@@ -83,7 +84,7 @@ func (s *Store) PutEntry(entry *Entry) error {
 
 	entKey := s.entryKey(entry.Year, entry.Day)
 
-	_, err := datastore.Put(s.ctx, entKey, entry)
+	_, err := s.client.Put(ctx, entKey, entry)
 
 	return err
 }

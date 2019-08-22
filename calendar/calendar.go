@@ -39,10 +39,13 @@ type calendarData struct {
 }
 
 type Handler struct {
+	store *store.Store
 }
 
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler(s *store.Store) *Handler {
+	return &Handler{
+		store: s,
+	}
 }
 
 func (h *Handler) RegisterHandler(r chi.Router) {
@@ -62,8 +65,7 @@ func (h *Handler) calendarHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s := store.NewStore(ctx)
-	entries, err := s.GetEntries(year)
+	entries, err := h.store.GetEntries(ctx, year)
 	if err != nil {
 		log.Errorf(ctx, "Get entries error : %s", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

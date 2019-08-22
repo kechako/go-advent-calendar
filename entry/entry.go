@@ -26,10 +26,13 @@ type entryData struct {
 }
 
 type Handler struct {
+	store *store.Store
 }
 
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler(s *store.Store) *Handler {
+	return &Handler{
+		store: s,
+	}
 }
 
 func (h *Handler) RegisterHandler(r chi.Router) {
@@ -62,8 +65,7 @@ func (h *Handler) entryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s := store.NewStore(ctx)
-	e, err := s.GetEntry(year, day)
+	e, err := h.store.GetEntry(ctx, year, day)
 	if err != nil {
 		log.Errorf(ctx, "Get entry error : %s", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

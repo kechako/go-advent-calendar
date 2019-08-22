@@ -28,8 +28,7 @@ func (h *Handler) entryPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s := store.NewStore(ctx)
-	e, err := s.GetEntry(year, day)
+	e, err := h.store.GetEntry(ctx, year, day)
 	if err != nil {
 		log.Errorf(ctx, "Get entry error : %s", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -48,7 +47,7 @@ func (h *Handler) entryPostHandler(w http.ResponseWriter, r *http.Request) {
 	e.Author = r.FormValue("author")
 	e.Section = r.FormValue("section")
 
-	err = s.PutEntry(e)
+	err = h.store.PutEntry(ctx, e)
 	if err != nil {
 		log.Errorf(ctx, "Put entry error : %s", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
