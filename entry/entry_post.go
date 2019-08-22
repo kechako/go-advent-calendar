@@ -4,30 +4,25 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kechako/go-advent-calendar/router"
+	"github.com/go-chi/chi"
 	"github.com/kechako/go-advent-calendar/store"
+	"github.com/kechako/go-advent-calendar/util"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 )
 
 // エントリーを登録するハンドラー
-func entryPostHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) entryPostHandler(w http.ResponseWriter, r *http.Request) {
 	// App Engine のコンテキスト取得
 	ctx := appengine.NewContext(r)
 
-	params, err := router.GetPathParams(r, "entries", ":year", ":day")
-	if err != nil {
-		http.NotFound(w, r)
-		return
-	}
-
-	year, ok := router.GetYear(params["year"])
+	year, ok := util.GetYear(chi.URLParam(r, "year"))
 	if !ok {
 		http.NotFound(w, r)
 		return
 	}
 
-	day, ok := router.GetDay(params["day"])
+	day, ok := util.GetDay(chi.URLParam(r, "day"))
 	if !ok {
 		http.NotFound(w, r)
 		return

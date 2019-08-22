@@ -6,33 +6,19 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/kechako/go-advent-calendar/router"
+	"github.com/go-chi/chi"
 	"github.com/kechako/go-advent-calendar/store"
+	"github.com/kechako/go-advent-calendar/util"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 )
 
-func init() {
-	http.Handle("/api/entries/",
-		router.IPFilterHandler(
-			router.MethodsHandler(map[string]http.Handler{
-				"GET":  http.HandlerFunc(entriesAPIHandler),
-				"POST": http.HandlerFunc(postEntriesAPIHandler),
-			})))
-}
-
 // エントリーを JSON で返すAPIハンドラー
-func entriesAPIHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) entriesAPIHandler(w http.ResponseWriter, r *http.Request) {
 	// App Engine のコンテキスト取得
 	ctx := appengine.NewContext(r)
 
-	params, err := router.GetPathParams(r, "api", "entries", ":year")
-	if err != nil {
-		http.NotFound(w, r)
-		return
-	}
-
-	year, ok := router.GetYear(params["year"])
+	year, ok := util.GetYear(chi.URLParam(r, "year"))
 	if !ok {
 		http.NotFound(w, r)
 		return
@@ -60,17 +46,11 @@ func entriesAPIHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // エントリーをJSON 受け取るAPIハンドラー
-func postEntriesAPIHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) postEntriesAPIHandler(w http.ResponseWriter, r *http.Request) {
 	// App Engine のコンテキスト取得
 	ctx := appengine.NewContext(r)
 
-	params, err := router.GetPathParams(r, "api", "entries", ":year")
-	if err != nil {
-		http.NotFound(w, r)
-		return
-	}
-
-	year, ok := router.GetYear(params["year"])
+	year, ok := util.GetYear(chi.URLParam(r, "year"))
 	if !ok {
 		http.NotFound(w, r)
 		return
@@ -82,7 +62,7 @@ func postEntriesAPIHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	entries := make([]*store.Entry, 25)
-	err = json.NewDecoder(r.Body).Decode(&entries)
+	err := json.NewDecoder(r.Body).Decode(&entries)
 	if err != nil {
 		log.Errorf(ctx, "JSON parse error : %s", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

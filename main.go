@@ -8,14 +8,24 @@ import (
 	"os"
 	"runtime"
 
-	_ "github.com/kechako/go-advent-calendar/calendar"
-	_ "github.com/kechako/go-advent-calendar/entry"
+	"github.com/go-chi/chi"
+	"github.com/kechako/go-advent-calendar/calendar"
+	"github.com/kechako/go-advent-calendar/entry"
+	"github.com/kechako/go-advent-calendar/util"
 )
 
 func main() {
-	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+
+	r := chi.NewRouter()
+	r.Use(util.IPFilterHandler)
+	r.Get("/version", func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, runtime.Version())
 	})
+
+	c := calendar.NewHandler()
+	c.RegisterHandler(r)
+	e := entry.NewHandler()
+	e.RegisterHandler(r)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -24,5 +34,5 @@ func main() {
 	}
 
 	log.Printf("Listening on port %s", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), r))
 }

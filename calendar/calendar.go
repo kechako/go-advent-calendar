@@ -7,9 +7,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-chi/chi"
 	"github.com/kechako/go-advent-calendar/config"
-	"github.com/kechako/go-advent-calendar/router"
 	"github.com/kechako/go-advent-calendar/store"
+	"github.com/kechako/go-advent-calendar/util"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 )
@@ -37,28 +38,25 @@ type calendarData struct {
 	Now   time.Time
 }
 
-func init() {
-	http.Handle("/",
-		router.IPFilterHandler(
-			router.MethodsHandler(map[string]http.Handler{
-				"GET": http.HandlerFunc(calendarHandler),
-			})))
+type Handler struct {
+}
+
+func NewHandler() *Handler {
+	return &Handler{}
+}
+
+func (h *Handler) RegisterHandler(r chi.Router) {
+	r.Get("/{year}", h.calendarHandler)
 }
 
 // カレンダーを表示するハンドラー
-func calendarHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) calendarHandler(w http.ResponseWriter, r *http.Request) {
 	// App Engine のコンテキスト取得
 	ctx := appengine.NewContext(r)
 
 	conf := config.GetConfig()
 
-	params, err := router.GetPathParams(r, ":year")
-	if err != nil {
-		http.NotFound(w, r)
-		return
-	}
-
-	year, ok := router.GetYear(params["year"])
+	year, ok := util.GetYear(chi.URLParam(r, "year"))
 	if !ok {
 		http.NotFound(w, r)
 		return
