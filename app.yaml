@@ -1,5 +1,4 @@
-runtime: go
-api_version: go1.8
+runtime: go112
 
 instance_class: B1
 basic_scaling:
@@ -11,7 +10,7 @@ handlers:
   static_dir: static/css
 
 - url: /.*
-  script: _go_app
+  script: auto
 
 env_variables:
   CALENDAR_NAME: Advent Calendar
