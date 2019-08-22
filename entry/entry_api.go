@@ -7,16 +7,15 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/kechako/go-advent-calendar/log"
 	"github.com/kechako/go-advent-calendar/store"
 	"github.com/kechako/go-advent-calendar/util"
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
+	"go.uber.org/zap"
 )
 
 // エントリーを JSON で返すAPIハンドラー
 func (h *Handler) entriesAPIHandler(w http.ResponseWriter, r *http.Request) {
-	// App Engine のコンテキスト取得
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	year, ok := util.GetYear(chi.URLParam(r, "year"))
 	if !ok {
@@ -26,7 +25,7 @@ func (h *Handler) entriesAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 	entries, err := h.store.GetEntries(ctx, year)
 	if err != nil {
-		log.Errorf(ctx, "Get entries error : %s", err)
+		log.Logger.Error("failed to get entries", zap.Error(err))
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -36,7 +35,7 @@ func (h *Handler) entriesAPIHandler(w http.ResponseWriter, r *http.Request) {
 	buff := new(bytes.Buffer)
 	err = json.NewEncoder(buff).Encode(entries)
 	if err != nil {
-		log.Errorf(ctx, "Template error: %s", err)
+		log.Logger.Error("failed to encode JSON", zap.Error(err))
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -46,8 +45,7 @@ func (h *Handler) entriesAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 // エントリーをJSON 受け取るAPIハンドラー
 func (h *Handler) postEntriesAPIHandler(w http.ResponseWriter, r *http.Request) {
-	// App Engine のコンテキスト取得
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	year, ok := util.GetYear(chi.URLParam(r, "year"))
 	if !ok {
@@ -63,7 +61,7 @@ func (h *Handler) postEntriesAPIHandler(w http.ResponseWriter, r *http.Request) 
 	entries := make([]*store.Entry, 25)
 	err := json.NewDecoder(r.Body).Decode(&entries)
 	if err != nil {
-		log.Errorf(ctx, "JSON parse error : %s", err)
+		log.Logger.Error("failed to decode JSON", zap.Error(err))
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -80,7 +78,7 @@ func (h *Handler) postEntriesAPIHandler(w http.ResponseWriter, r *http.Request) 
 
 		err = h.store.PutEntry(ctx, e)
 		if err != nil {
-			log.Errorf(ctx, "Put entry error : %s", err)
+			log.Logger.Error("failed to put entry", zap.Error(err))
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}

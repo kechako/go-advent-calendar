@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"runtime"
@@ -12,14 +11,16 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/kechako/go-advent-calendar/calendar"
 	"github.com/kechako/go-advent-calendar/entry"
+	"github.com/kechako/go-advent-calendar/log"
 	"github.com/kechako/go-advent-calendar/store"
 	"github.com/kechako/go-advent-calendar/util"
+	"go.uber.org/zap"
 )
 
 func main() {
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	if projectID == "" {
-		log.Fatal("GOOGLE_CLOUD_PROJECT environment variable not set")
+		log.Logger.Fatal("GOOGLE_CLOUD_PROJECT environment variable not set")
 	}
 
 	ctx := context.Background()
@@ -32,7 +33,7 @@ func main() {
 
 	s, err := store.NewStore(ctx, projectID)
 	if err != nil {
-		log.Fatal("Failed to initialize Cloud Datastore client: ", err)
+		log.Logger.Fatal("failed to initialize Cloud Datastore client", zap.Error(err))
 	}
 	defer s.Close()
 
@@ -45,9 +46,12 @@ func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
-		log.Printf("Defaulting to port %s", port)
+		log.Logger.Info(fmt.Sprintf("Defaulting to port %s", port))
 	}
 
-	log.Printf("Listening on port %s", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), r))
+	log.Logger.Info(fmt.Sprintf("Listening on port %s", port))
+	err = http.ListenAndServe(fmt.Sprintf(":%s", port), r)
+	if err != nil && err != http.ErrServerClosed {
+		log.Logger.Error("error ListenAndServe", zap.Error(err))
+	}
 }

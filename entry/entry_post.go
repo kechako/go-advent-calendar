@@ -5,16 +5,15 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/kechako/go-advent-calendar/log"
 	"github.com/kechako/go-advent-calendar/store"
 	"github.com/kechako/go-advent-calendar/util"
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
+	"go.uber.org/zap"
 )
 
 // エントリーを登録するハンドラー
 func (h *Handler) entryPostHandler(w http.ResponseWriter, r *http.Request) {
-	// App Engine のコンテキスト取得
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	year, ok := util.GetYear(chi.URLParam(r, "year"))
 	if !ok {
@@ -30,7 +29,7 @@ func (h *Handler) entryPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	e, err := h.store.GetEntry(ctx, year, day)
 	if err != nil {
-		log.Errorf(ctx, "Get entry error : %s", err)
+		log.Logger.Error("failed to get entry", zap.Error(err))
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -49,7 +48,7 @@ func (h *Handler) entryPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = h.store.PutEntry(ctx, e)
 	if err != nil {
-		log.Errorf(ctx, "Put entry error : %s", err)
+		log.Logger.Error("failed to put entry", zap.Error(err))
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}

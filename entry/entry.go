@@ -8,10 +8,10 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/kechako/go-advent-calendar/config"
+	"github.com/kechako/go-advent-calendar/log"
 	"github.com/kechako/go-advent-calendar/store"
 	"github.com/kechako/go-advent-calendar/util"
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
+	"go.uber.org/zap"
 )
 
 // テンプレート
@@ -48,8 +48,7 @@ func (h *Handler) RegisterHandler(r chi.Router) {
 
 // エントリーを表示するハンドラー
 func (h *Handler) entryHandler(w http.ResponseWriter, r *http.Request) {
-	// App Engine のコンテキスト取得
-	ctx := appengine.NewContext(r)
+	ctx := r.Context()
 
 	conf := config.GetConfig()
 
@@ -67,7 +66,7 @@ func (h *Handler) entryHandler(w http.ResponseWriter, r *http.Request) {
 
 	e, err := h.store.GetEntry(ctx, year, day)
 	if err != nil {
-		log.Errorf(ctx, "Get entry error : %s", err)
+		log.Logger.Error("failed to get entry", zap.Error(err))
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -90,7 +89,7 @@ func (h *Handler) entryHandler(w http.ResponseWriter, r *http.Request) {
 	buff := new(bytes.Buffer)
 	err = entryTmpl.Execute(buff, data)
 	if err != nil {
-		log.Errorf(ctx, "Template error: %s", err)
+		log.Logger.Error("failed to execute template", zap.Error(err))
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
