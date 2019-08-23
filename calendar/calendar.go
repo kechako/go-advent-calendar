@@ -49,6 +49,7 @@ func NewHandler(s *store.Store) *Handler {
 }
 
 func (h *Handler) RegisterHandler(r chi.Router) {
+	r.Get("/", h.calendarHandler)
 	r.Get("/{year}", h.calendarHandler)
 }
 
@@ -58,10 +59,18 @@ func (h *Handler) calendarHandler(w http.ResponseWriter, r *http.Request) {
 
 	conf := config.GetConfig()
 
-	year, ok := util.GetYear(chi.URLParam(r, "year"))
-	if !ok {
-		http.NotFound(w, r)
-		return
+	y := chi.URLParam(r, "year")
+
+	var year int
+	if y == "" {
+		year = util.CurrentYear()
+	} else {
+		var ok bool
+		year, ok = util.GetYear(y)
+		if !ok {
+			http.NotFound(w, r)
+			return
+		}
 	}
 
 	entries, err := h.store.GetEntries(ctx, year)
